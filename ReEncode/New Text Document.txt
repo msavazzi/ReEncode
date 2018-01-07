@@ -1,0 +1,142 @@
+Imports System.IO
+Imports MediaInfo
+
+Public Class Form1
+    Public Function ConvertSize(ByVal fileSize As Long) As String
+
+        Dim sizeOfKB As Long = 1024              ' Actual size in bytes of 1KB
+        Dim sizeOfMB As Long = 1048576           ' 1MB
+        Dim sizeOfGB As Long = 1073741824        ' 1GB
+        Dim sizeOfTB As Long = 1099511627776     ' 1TB
+        Dim sizeofPB As Long = 1125899906842624  ' 1PB
+
+        Dim tempFileSize As Double
+        Dim tempFileSizeString As String
+
+        Dim myArr() As Char = {CChar("0"), CChar(".")}  'Characters to strip off the end of our string after formating
+
+        If fileSize < sizeOfKB Then 'Filesize is in Bytes
+            tempFileSize = ConvertBytes(fileSize, convTo.B)
+            If tempFileSize = -1 Then Return Nothing 'Invalid conversion attempted so exit
+            tempFileSizeString = Format(fileSize, "Standard").TrimEnd(myArr) ' Strip the 0's and 1's off the end of the string
+            Return Math.Round(tempFileSize) & " bytes" 'Return our converted value
+
+        ElseIf fileSize >= sizeOfKB And fileSize < sizeOfMB Then 'Filesize is in Kilobytes
+            tempFileSize = ConvertBytes(fileSize, convTo.KB)
+            If tempFileSize = -1 Then Return Nothing 'Invalid conversion attempted so exit
+            tempFileSizeString = Format(fileSize, "Standard").TrimEnd(myArr)
+            Return Math.Round(tempFileSize) & " KB"
+
+        ElseIf fileSize >= sizeOfMB And fileSize < sizeOfGB Then ' Filesize is in Megabytes
+            tempFileSize = ConvertBytes(fileSize, convTo.MB)
+            If tempFileSize = -1 Then Return Nothing 'Invalid conversion attempted so exit
+            tempFileSizeString = Format(fileSize, "Standard").TrimEnd(myArr)
+            Return Math.Round(tempFileSize, 1) & " MB"
+
+        ElseIf fileSize >= sizeOfGB And fileSize < sizeOfTB Then 'Filesize is in Gigabytes
+            tempFileSize = ConvertBytes(fileSize, convTo.GB)
+            If tempFileSize = -1 Then Return Nothing
+            tempFileSizeString = Format(fileSize, "Standard").TrimEnd(myArr)
+            Return Math.Round(tempFileSize, 1) & " GB"
+
+        ElseIf fileSize >= sizeOfTB And fileSize < sizeofPB Then 'Filesize is in Terabytes
+            tempFileSize = ConvertBytes(fileSize, convTo.TB)
+            If tempFileSize = -1 Then Return Nothing
+            tempFileSizeString = Format(fileSize, "Standard").TrimEnd(myArr)
+            Return Math.Round(tempFileSize, 1) & " TB"
+
+            'Anything bigger than that is silly ;)
+
+        Else
+
+            Return Nothing 'Invalid filesize so return Nothing
+
+        End If
+
+    End Function
+
+    Public Function ConvertDuration(ByVal Duration As Long) As String
+        Dim aMSec As Long
+        Dim aSec As Long
+        Dim aMin As Long
+        Dim aHou As Long
+
+        aHou = Duration \ 3600000
+        aMin = (Duration - aHou * 3600000) \ 60000
+        aSec = (Duration - (aHou * 3600000 + aMin * 60000)) \ 1000
+        aMSec = Duration - (aSec * 1000 + aMin * 60000 + aHou * 3600000)
+        Return Strings.Right("00" & aHou, 2) & ":" & Strings.Right("00" & aMin, 2) & ":" & Strings.Right("00" & aSec, 2) & "." & Strings.Right("0000" & aMSec, 4)
+    End Function
+
+    Public Function ConvertBytes(ByVal bytes As Long, ByVal convertTo As convTo) As Double
+
+        If convTo.IsDefined(GetType(convTo), convertTo) Then
+
+            Return bytes / (1024 ^ convertTo)
+
+        Else
+
+            Return -1 'An invalid value was passed to this function so exit
+
+        End If
+
+    End Function
+
+    Public Enum convTo
+        B = 0
+        KB = 1
+        MB = 2
+        GB = 3  'Enumerations for file size conversions
+        TB = 4
+        PB = 5
+        EB = 6
+        ZI = 7
+        YI = 8
+    End Enum
+
+    Public Sub DirSearch(ByVal sDir As String)
+        Dim dir As String
+        Dim aMedia As MediaInfoWrapper
+        Dim aSt As String
+        Dim aNode As TreeNode
+        Dim aLeaf As TreeNode
+        Dim aI As Integer
+
+        'Try
+        Debug.Print(sDir)
+        For Each file In Directory.GetFiles(sDir, "*.ts")
+            Debug.Print(vbTab & file)
+            'aSt = Path.Combine(ReEncode.My.Application.Info.DirectoryPath, "MediaInfo.dll")
+            aSt = "C:\Users\massi\Downloads\1111\MediaInfo.dll"
+            aMedia = New MediaInfoWrapper(file)
+            dgvFileProperties.Rows.Add("File", aMedia.VideoResolution, aMedia.VideoCodec, aMedia.AudioChannels, aMedia.Subtitles)
+            aNode = New TreeNode(Path.GetFileName(file) & "  - (" & ConvertDuration(aMedia.Duration) & ") - " & ConvertSize(aMedia.Size))
+            aNode.Tag = aMedia
+            For aI = 0 To aMedia.VideoStreams.Count - 1
+                aLeaf = New TreeNode("Video: " & aMedia.VideoStreams(aI).Width & " x " & aMedia.VideoStreams(aI).Height & " (" & IIf(aMedia.VideoStreams(aI).Interlaced, "I", "P") & ") - " & aMedia.VideoStreams(aI).Codec)
+                aNode.Nodes.Add(aLeaf)
+            Next aI
+            For aI = 0 To aMedia.AudioStreams.Count - 1
+                aLeaf = New TreeNode("Audio: " & aMedia.AudioStreams(aI).Codec & " (" & aMedia.AudioStreams(aI).CodecFriendly & ") " & aMedia.AudioStreams(aI).Bitrate)
+                aNode.Nodes.Add(aLeaf)
+            Next aI
+            If aMedia.HasSubtitles Then
+                For aI = 0 To aMedia.Subtitles.Count - 1
+                    aLeaf = New TreeNode("Subs: " & aMedia.Subtitles(aI).Kind & " - " & aMedia.Subtitles(aI).Language & " - " & aMedia.Subtitles(aI).Name & " - " & aMedia.Subtitles(aI).Id)
+                    aNode.Nodes.Add(aLeaf)
+                Next aI
+            End If
+            trMovieList.Nodes.Add(aNode)
+        Next
+        For Each dir In Directory.GetDirectories(sDir)
+            DirSearch(dir)
+        Next
+        'Catch ex As Exception
+        'Debug.WriteLine(ex.Message)
+        'End Try
+    End Sub
+
+    Private Sub btnScan_Click(sender As Object, e As EventArgs) Handles btnScan.Click
+        DirSearch("\\nas-homelan\video\Film\(500) Giorni insieme (2009)")
+    End Sub
+End Class

@@ -1,0 +1,63 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="VideoOpt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-e qsv_h265 --encoder-preset quality</Value>
+    </Setting>
+    <Setting Name="AudioOpt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">--all-audio -E copy</Value>
+    </Setting>
+    <Setting Name="SubsOpt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">--all-subtitles</Value>
+    </Setting>
+    <Setting Name="ResSD" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 20 </Value>
+    </Setting>
+    <Setting Name="Res1080" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 18</Value>
+    </Setting>
+    <Setting Name="Res720" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 19</Value>
+    </Setting>
+    <Setting Name="Res480" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 20</Value>
+    </Setting>
+    <Setting Name="Res576" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 20</Value>
+    </Setting>
+    <Setting Name="ResHi" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-q 18</Value>
+    </Setting>
+    <Setting Name="OutputExt" Type="System.String" Scope="User">
+      <Value Profile="(Default)">.mkv</Value>
+    </Setting>
+    <Setting Name="OutputPath" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\</Value>
+    </Setting>
+    <Setting Name="HandBrakeCLI" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="ScanRoot" Type="System.String" Scope="User">
+      <Value Profile="(Default)">c:\</Value>
+    </Setting>
+    <Setting Name="ScanFilter" Type="System.String" Scope="User">
+      <Value Profile="(Default)">*.ts</Value>
+    </Setting>
+    <Setting Name="WindowLocation" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">-1, -1</Value>
+    </Setting>
+    <Setting Name="WindowSize" Type="System.Drawing.Point" Scope="User">
+      <Value Profile="(Default)">0, 0</Value>
+    </Setting>
+    <Setting Name="ReplaceOri" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="OnlyIfSmaller" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="OutputSel" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
