@@ -26,13 +26,16 @@ Partial Class reEncode
         Me.SplitContainer2 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer1 = New System.Windows.Forms.SplitContainer()
         Me.SplitContainer3 = New System.Windows.Forms.SplitContainer()
+        Me.btnSkipOne = New System.Windows.Forms.Button()
+        Me.Button1 = New System.Windows.Forms.Button()
         Me.btnProcessOne = New System.Windows.Forms.Button()
         Me.btnConvert = New System.Windows.Forms.Button()
         Me.btnMedia = New System.Windows.Forms.Button()
         Me.btnScan = New System.Windows.Forms.Button()
         Me.SplitContainer4 = New System.Windows.Forms.SplitContainer()
         Me.btnSettings = New System.Windows.Forms.Button()
-        Me.btnReproOne = New System.Windows.Forms.Button()
+        Me.btnClearOne = New System.Windows.Forms.Button()
+        Me.btnClearErrors = New System.Windows.Forms.Button()
         Me.btnClearStatus = New System.Windows.Forms.Button()
         Me.btnPause = New System.Windows.Forms.Button()
         Me.dgvFileProperties = New System.Windows.Forms.DataGridView()
@@ -45,8 +48,6 @@ Partial Class reEncode
         Me.tsslAvgFPS = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tsslETA = New System.Windows.Forms.ToolStripStatusLabel()
         Me.tssslRows = New System.Windows.Forms.ToolStripStatusLabel()
-        Me.Button1 = New System.Windows.Forms.Button()
-        Me.btnSkipOne = New System.Windows.Forms.Button()
         CType(Me.SplitContainer2, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SplitContainer2.Panel1.SuspendLayout()
         Me.SplitContainer2.Panel2.SuspendLayout()
@@ -84,7 +85,7 @@ Partial Class reEncode
         '
         Me.SplitContainer2.Panel2.Controls.Add(Me.StatusStrip1)
         Me.SplitContainer2.Panel2MinSize = 19
-        Me.SplitContainer2.Size = New System.Drawing.Size(987, 460)
+        Me.SplitContainer2.Size = New System.Drawing.Size(1057, 460)
         Me.SplitContainer2.SplitterDistance = 431
         Me.SplitContainer2.TabIndex = 1
         '
@@ -106,7 +107,7 @@ Partial Class reEncode
         '
         Me.SplitContainer1.Panel2.Controls.Add(Me.dgvFileProperties)
         Me.SplitContainer1.Panel2.Padding = New System.Windows.Forms.Padding(5)
-        Me.SplitContainer1.Size = New System.Drawing.Size(987, 431)
+        Me.SplitContainer1.Size = New System.Drawing.Size(1057, 431)
         Me.SplitContainer1.SplitterDistance = 35
         Me.SplitContainer1.TabIndex = 1
         '
@@ -131,9 +132,27 @@ Partial Class reEncode
         'SplitContainer3.Panel2
         '
         Me.SplitContainer3.Panel2.Controls.Add(Me.SplitContainer4)
-        Me.SplitContainer3.Size = New System.Drawing.Size(987, 35)
+        Me.SplitContainer3.Size = New System.Drawing.Size(1057, 35)
         Me.SplitContainer3.SplitterDistance = 529
         Me.SplitContainer3.TabIndex = 5
+        '
+        'btnSkipOne
+        '
+        Me.btnSkipOne.Location = New System.Drawing.Point(426, 2)
+        Me.btnSkipOne.Name = "btnSkipOne"
+        Me.btnSkipOne.Size = New System.Drawing.Size(100, 31)
+        Me.btnSkipOne.TabIndex = 4
+        Me.btnSkipOne.Text = "Skip One"
+        Me.btnSkipOne.UseVisualStyleBackColor = True
+        '
+        'Button1
+        '
+        Me.Button1.Location = New System.Drawing.Point(426, 3)
+        Me.Button1.Name = "Button1"
+        Me.Button1.Size = New System.Drawing.Size(100, 31)
+        Me.Button1.TabIndex = 4
+        Me.Button1.Text = "Process One"
+        Me.Button1.UseVisualStyleBackColor = True
         '
         'btnProcessOne
         '
@@ -176,50 +195,60 @@ Partial Class reEncode
         Me.SplitContainer4.Dock = System.Windows.Forms.DockStyle.Right
         Me.SplitContainer4.FixedPanel = System.Windows.Forms.FixedPanel.Panel2
         Me.SplitContainer4.IsSplitterFixed = True
-        Me.SplitContainer4.Location = New System.Drawing.Point(-79, 0)
+        Me.SplitContainer4.Location = New System.Drawing.Point(-9, 0)
         Me.SplitContainer4.Name = "SplitContainer4"
         '
         'SplitContainer4.Panel2
         '
         Me.SplitContainer4.Panel2.Controls.Add(Me.btnSettings)
-        Me.SplitContainer4.Panel2.Controls.Add(Me.btnReproOne)
+        Me.SplitContainer4.Panel2.Controls.Add(Me.btnClearOne)
+        Me.SplitContainer4.Panel2.Controls.Add(Me.btnClearErrors)
         Me.SplitContainer4.Panel2.Controls.Add(Me.btnClearStatus)
         Me.SplitContainer4.Panel2.Controls.Add(Me.btnPause)
         Me.SplitContainer4.Panel2MinSize = 245
         Me.SplitContainer4.Size = New System.Drawing.Size(533, 35)
-        Me.SplitContainer4.SplitterDistance = 210
+        Me.SplitContainer4.SplitterDistance = 119
         Me.SplitContainer4.TabIndex = 0
         '
         'btnSettings
         '
         Me.btnSettings.Image = CType(resources.GetObject("btnSettings.Image"), System.Drawing.Image)
-        Me.btnSettings.Location = New System.Drawing.Point(281, 2)
+        Me.btnSettings.Location = New System.Drawing.Point(371, 3)
         Me.btnSettings.Name = "btnSettings"
         Me.btnSettings.Size = New System.Drawing.Size(36, 31)
         Me.btnSettings.TabIndex = 3
         Me.btnSettings.UseVisualStyleBackColor = True
         '
-        'btnReproOne
+        'btnClearOne
         '
-        Me.btnReproOne.Location = New System.Drawing.Point(5, 2)
-        Me.btnReproOne.Name = "btnReproOne"
-        Me.btnReproOne.Size = New System.Drawing.Size(86, 31)
-        Me.btnReproOne.TabIndex = 4
-        Me.btnReproOne.Text = "Clear One"
-        Me.btnReproOne.UseVisualStyleBackColor = True
+        Me.btnClearOne.Location = New System.Drawing.Point(3, 3)
+        Me.btnClearOne.Name = "btnClearOne"
+        Me.btnClearOne.Size = New System.Drawing.Size(86, 31)
+        Me.btnClearOne.TabIndex = 4
+        Me.btnClearOne.Text = "Clear One"
+        Me.btnClearOne.UseVisualStyleBackColor = True
+        '
+        'btnClearErrors
+        '
+        Me.btnClearErrors.Location = New System.Drawing.Point(95, 3)
+        Me.btnClearErrors.Name = "btnClearErrors"
+        Me.btnClearErrors.Size = New System.Drawing.Size(86, 31)
+        Me.btnClearErrors.TabIndex = 4
+        Me.btnClearErrors.Text = "Clear Errors"
+        Me.btnClearErrors.UseVisualStyleBackColor = True
         '
         'btnClearStatus
         '
-        Me.btnClearStatus.Location = New System.Drawing.Point(97, 2)
+        Me.btnClearStatus.Location = New System.Drawing.Point(187, 3)
         Me.btnClearStatus.Name = "btnClearStatus"
         Me.btnClearStatus.Size = New System.Drawing.Size(86, 31)
         Me.btnClearStatus.TabIndex = 4
-        Me.btnClearStatus.Text = "Clear Status"
+        Me.btnClearStatus.Text = "Clear All"
         Me.btnClearStatus.UseVisualStyleBackColor = True
         '
         'btnPause
         '
-        Me.btnPause.Location = New System.Drawing.Point(189, 2)
+        Me.btnPause.Location = New System.Drawing.Point(279, 3)
         Me.btnPause.Name = "btnPause"
         Me.btnPause.Size = New System.Drawing.Size(86, 31)
         Me.btnPause.TabIndex = 2
@@ -239,7 +268,7 @@ Partial Class reEncode
         Me.dgvFileProperties.Margin = New System.Windows.Forms.Padding(3, 3, 3, 0)
         Me.dgvFileProperties.Name = "dgvFileProperties"
         Me.dgvFileProperties.ReadOnly = True
-        Me.dgvFileProperties.Size = New System.Drawing.Size(977, 382)
+        Me.dgvFileProperties.Size = New System.Drawing.Size(1047, 382)
         Me.dgvFileProperties.TabIndex = 0
         '
         'StatusStrip1
@@ -247,7 +276,7 @@ Partial Class reEncode
         Me.StatusStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.tsslStatus, Me.tspbComplete, Me.tsslFiles, Me.tsslPercentage, Me.tsslFPS, Me.tsslAvgFPS, Me.tsslETA, Me.tssslRows})
         Me.StatusStrip1.Location = New System.Drawing.Point(0, 3)
         Me.StatusStrip1.Name = "StatusStrip1"
-        Me.StatusStrip1.Size = New System.Drawing.Size(987, 22)
+        Me.StatusStrip1.Size = New System.Drawing.Size(1057, 22)
         Me.StatusStrip1.TabIndex = 2
         Me.StatusStrip1.Text = "StatusStrip1"
         '
@@ -266,7 +295,7 @@ Partial Class reEncode
         'tsslFiles
         '
         Me.tsslFiles.Name = "tsslFiles"
-        Me.tsslFiles.Size = New System.Drawing.Size(398, 17)
+        Me.tsslFiles.Size = New System.Drawing.Size(468, 17)
         Me.tsslFiles.Spring = True
         Me.tsslFiles.Text = "ToolStripStatusLabel1"
         Me.tsslFiles.TextAlign = System.Drawing.ContentAlignment.MiddleLeft
@@ -311,29 +340,11 @@ Partial Class reEncode
         Me.tssslRows.Text = "tssslRows"
         Me.tssslRows.TextAlign = System.Drawing.ContentAlignment.MiddleRight
         '
-        'Button1
-        '
-        Me.Button1.Location = New System.Drawing.Point(426, 3)
-        Me.Button1.Name = "Button1"
-        Me.Button1.Size = New System.Drawing.Size(100, 31)
-        Me.Button1.TabIndex = 4
-        Me.Button1.Text = "Process One"
-        Me.Button1.UseVisualStyleBackColor = True
-        '
-        'btnSkipOne
-        '
-        Me.btnSkipOne.Location = New System.Drawing.Point(426, 2)
-        Me.btnSkipOne.Name = "btnSkipOne"
-        Me.btnSkipOne.Size = New System.Drawing.Size(100, 31)
-        Me.btnSkipOne.TabIndex = 4
-        Me.btnSkipOne.Text = "Skip One"
-        Me.btnSkipOne.UseVisualStyleBackColor = True
-        '
         'reEncode
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(987, 460)
+        Me.ClientSize = New System.Drawing.Size(1057, 460)
         Me.Controls.Add(Me.SplitContainer2)
         Me.DoubleBuffered = True
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
@@ -389,7 +400,8 @@ Partial Class reEncode
     Friend WithEvents btnScan As Button
     Friend WithEvents SplitContainer4 As SplitContainer
     Friend WithEvents btnProcessOne As Button
-    Friend WithEvents btnReproOne As Button
+    Friend WithEvents btnClearOne As Button
     Friend WithEvents btnSkipOne As Button
     Friend WithEvents Button1 As Button
+    Friend WithEvents btnClearErrors As Button
 End Class

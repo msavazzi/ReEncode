@@ -19,6 +19,7 @@ Public Class reEncode
     Private Shared _Pause As Boolean
 
     Private Shared HandbrakeOutputRegex As Regex = New Regex("Encoding:.*?, (\d{1,3}\.\d{1,2}) %( \((\d{1,4}\.\d{1,2}) fps, avg (\d{1,4}\.\d{1,2}) fps, ETA (\d{2}h\d{2}m\d{2}s)\))?", RegexOptions.Compiled)
+    Private Shared _OutFilename As String
     Private Shared _process As Process
     Private Shared _StartInfo As ProcessStartInfo
     Private Shared _out As String
@@ -29,7 +30,7 @@ Public Class reEncode
     Private Shared _Converting As Boolean
     Private Shared _WorkingMovie As Movie
     Private Shared _ScanChanged As Boolean = False
-
+    Private Shared _SeqO As ULong = 0
     Public Shared logger As Logger = NLog.LogManager.GetCurrentClassLogger()
 
     Private WithEvents _bwDirScan As New BackgroundWorker
@@ -147,7 +148,6 @@ Public Class reEncode
             logger.Info("_bwFileScan Cancelled")
             tsslStatus.Text = "Canceled!"
             btnClearStatus.Enabled = True
-            btnClearStatus.Enabled = True
             btnPause.Enabled = False
             If e.Result IsNot Nothing Then
                 logger.Debug(CType(e.Result, Exception).Message)
@@ -157,13 +157,11 @@ Public Class reEncode
             logger.Debug(e.Error.Message)
             tsslStatus.Text = "Error: " & e.Error.Message
             btnClearStatus.Enabled = True
-            btnClearStatus.Enabled = True
             btnPause.Enabled = False
         Else
             logger.Info("_bwFileScan Completed")
-            btnClearStatus.Enabled = True
-            btnClearStatus.Enabled = True
             btnPause.Enabled = False
+            btnClearStatus.Enabled = True
             tspbComplete.Value = Dirs.Count + 1
             dgvFilePropertiesRefresh(, True)
             tsslStatus.Text = "Saving..."
@@ -171,10 +169,14 @@ Public Class reEncode
             SaveStatus()
             tsslStatus.Text = "Status"
             tspbComplete.Value = 0
-            btnMedia.Enabled = True
-            btnProcessOne.Enabled = True
-            btnSettings.Enabled = True
             tssslRows.Text = "Rows: " & dgvFileProperties.RowCount
+            If _Movies.Movies.Count > 0 Then
+                btnMedia.Enabled = True
+                btnProcessOne.Enabled = True
+                btnSettings.Enabled = True
+            Else
+                btnScan.Enabled = True
+            End If
             Application.DoEvents()
             If CheckRows(False) Then
                 Dim style = MsgBoxStyle.OkOnly Or MsgBoxStyle.DefaultButton1 Or MsgBoxStyle.Critical
@@ -311,7 +313,6 @@ Public Class reEncode
 #Region "ConvertMedia Process Handling"
     Private Async Function DoConvertMedia() As Task
         Dim aMedia As MediaInfoWrapper
-        Dim aOut As String
         Dim aSt As String
         Dim aSuccess As Integer
         Dim aOpts As String
@@ -333,9 +334,9 @@ Public Class reEncode
         With _WorkingMovie
             Try
                 If My.Settings.OutputSel Then
-                    aOut = Path.Combine(Path.GetDirectoryName(._FileName), Path.GetFileNameWithoutExtension(._FileName) & My.Settings.OutputExt)
+                    _OutFilename = Path.Combine(Path.GetDirectoryName(._FileName), Path.GetFileNameWithoutExtension(._FileName) & My.Settings.OutputExt)
                 Else
-                    aOut = Path.Combine(My.Settings.OutputPath, Path.GetFileNameWithoutExtension(._FileName) & My.Settings.OutputExt)
+                    _OutFilename = Path.Combine(My.Settings.OutputPath, Path.GetFileNameWithoutExtension(._FileName) & My.Settings.OutputExt)
                 End If
                 aOpts = My.Settings.AudioOpt & " " & My.Settings.SubsOpt & " " & My.Settings.VideoOpt
                 If (._Width > 1920) Or (._Height > 1080) Then
@@ -351,12 +352,12 @@ Public Class reEncode
                 Else
                     aOpts = aOpts & " " & My.Settings.ResSD
                 End If
-                aSt = " -i " & """" & ._FileName & """" & " -o " & """" & aOut & """" & " " & aOpts
+                aSt = " -i " & """" & ._FileName & """" & " -o " & """" & _OutFilename & """" & " " & aOpts
 
                 logger.Trace(aSt)
 
                 _status.InputFile = Path.GetFileName(._FileName)
-                _status.OutputFile = Path.GetFileName(aOut)
+                _status.OutputFile = Path.GetFileName(_OutFilename)
                 _StartInfo = New ProcessStartInfo(My.Settings.HandBrakeCLI, aSt)
                 _StartInfo.RedirectStandardOutput = True
                 _StartInfo.UseShellExecute = False
@@ -369,6 +370,7 @@ Public Class reEncode
                 End While
 
                 PrintStatus()
+                Application.DoEvents()
                 'PrintError()
                 _process = New Process() With {.EnableRaisingEvents = True, .StartInfo = _StartInfo}
 
@@ -390,7 +392,7 @@ Public Class reEncode
                 If aSuccess = 0 Then
                     ._Processed = True
                     Try
-                        aMedia = New MediaInfoWrapper(aOut)
+                        aMedia = New MediaInfoWrapper(_OutFilename)
                         ._newSize = aMedia.Size
                         If (My.Settings.ReplaceOri And ((Not My.Settings.OnlyIfSmaller) Or (My.Settings.OnlyIfSmaller And (.Size > ._newSize)))) Then
                             Try
@@ -405,11 +407,11 @@ Public Class reEncode
                                 End While
                                 aSt = Path.Combine(Path.GetDirectoryName(._FileName), Path.GetFileNameWithoutExtension(._FileName) & My.Settings.OutputExt)
                                 aCopyOk = True
-                                File.Copy(aOut, aSt)
+                                File.Copy(_OutFilename, aSt)
                             Catch ex As Exception
                                 aCopyOk = False
                                 logger.Error(ex, New StackFrame().GetMethod().Name)
-                                logger.Debug("Unable to copy : " & aOut & " to " & aSt)
+                                logger.Debug("Unable to copy : " & _OutFilename & " to " & aSt)
                             End Try
                             If aCopyOk Then
                                 Try
@@ -419,10 +421,10 @@ Public Class reEncode
                                     logger.Debug("Unable to delete : " & ._FileName)
                                 End Try
                                 Try
-                                    File.Delete(aOut)
+                                    File.Delete(_OutFilename)
                                 Catch ex As Exception
                                     logger.Error(ex, New StackFrame().GetMethod().Name)
-                                    logger.Debug("Unable to delete : " & aOut)
+                                    logger.Debug("Unable to delete : " & _OutFilename)
                                 End Try
                             End If
                         End If
@@ -526,7 +528,8 @@ Public Class reEncode
         btnProcessOne.Enabled = True
         btnSettings.Enabled = True
         btnClearStatus.Enabled = True
-        btnReproOne.Enabled = True
+        btnClearOne.Enabled = True
+        btnClearErrors.Enabled = True
         Application.DoEvents()
     End Sub
 
@@ -551,21 +554,48 @@ Public Class reEncode
     End Sub
 
     Private Shared Async Function AwaitProcess() As Task(Of Integer)
+        Dim aTask As Int32
         _tcs = New TaskCompletionSource(Of Integer)
         _status.Converting = True
         _status.Percentage = 0
         _status.CurrentFps = 0
         _status.AverageFps = 0
+        _status.Seq = 1
+        _SeqO = 0
         _Error.Clear()
         _process.Start()
         _process.BeginErrorReadLine()
         _process.BeginOutputReadLine()
-
-        Return Await _tcs.Task
+        aTask = Await _tcs.Task
+        logger.Trace("Process Exited: " & aTask)
+        Return aTask
     End Function
 
     Private Shared Sub HandbrakeCLIErrorHandler(sendingProcess As Object, outLine As DataReceivedEventArgs)
+        Dim aI As Integer
+        Dim aSt As String
         logger.Debug("E->" & outLine.Data)
+        If Strings.Left(outLine.Data, 10) = "Error code" Then
+            Try
+                aI = Strings.InStr(outLine.Data, ",")
+                aSt = Strings.Mid(outLine.Data, 12, aI - 12)
+                _tcs.SetResult(CInt(aSt))
+                If _process IsNot Nothing Then
+                    _process.Kill()
+                    _process = Nothing
+                    logger.Trace("Process killed!")
+                End If
+                Try
+                    File.Delete(_OutFilename)
+                Catch ex As Exception
+                    logger.Error(ex, New StackFrame().GetMethod().Name)
+                    logger.Debug("Unable to delete : " & _OutFilename)
+                End Try
+            Catch ex As Exception
+                logger.Error(ex, New StackFrame().GetMethod().Name)
+            End Try
+        End If
+
         '_pool.WaitOne()
         '_Error.Add(outLine.Data)
         '_pool.ReleaseMutex()
@@ -590,21 +620,23 @@ Public Class reEncode
             _status.CurrentFps = Single.Parse(match.Groups(3).Value, NumberStyles.Float, CultureInfo.InvariantCulture)
             _status.AverageFps = Single.Parse(match.Groups(4).Value, NumberStyles.Float, CultureInfo.InvariantCulture)
             _status.Estimated = TimeSpan.ParseExact(match.Groups(5).Value, "h\hm\ms\s", CultureInfo.InvariantCulture)
+            _status.Seq = _status.Seq + CULng(1)
         End If
     End Sub
 
     Private Async Sub PrintStatus()
-        Dim _RepTimespan As TimeSpan
-
         While _Converting
-            logger.Trace(_status.ToString)
-            tsslAvgFPS.Text = String.Format("AVG {0:000.00 fps}", _status.AverageFps)
-            tsslETA.Text = _status.Estimated.ToString("c")
-            tsslFiles.Text = _status.InputFile & " -> " & _status.OutputFile
-            tsslFPS.Text = String.Format("{0:000.00 fps}", _status.CurrentFps)
-            tsslPercentage.Text = String.Format("{0:00.00}%", _status.Percentage)
+            If _status.Seq <> _SeqO Then
+                logger.Trace(_status.ToString)
+                tsslAvgFPS.Text = String.Format("AVG {0:000.00 fps}", _status.AverageFps)
+                tsslETA.Text = _status.Estimated.ToString("c")
+                tsslFiles.Text = _status.InputFile & " -> " & _status.OutputFile
+                tsslFPS.Text = String.Format("{0:000.00 fps}", _status.CurrentFps)
+                tsslPercentage.Text = String.Format("{0:00.00}%", _status.Percentage)
+                _SeqO = _status.Seq
+            End If
             Application.DoEvents()
-            Await Task.Delay(100)
+            Await Task.Delay(25)
         End While
     End Sub
 
@@ -639,6 +671,9 @@ Public Class reEncode
             If dgvFileProperties.Columns("sScanned") IsNot Nothing Then
                 dgvFileProperties.Columns.Remove(dgvFileProperties.Columns("sScanned"))
             End If
+            For ai = 0 To dgvFileProperties.Columns.Count - 1
+                dgvFileProperties.Columns(ai).MinimumWidth = 30
+            Next
             dgvFileProperties.AutoResizeColumns(DataGridViewAutoSizeColumnsMode.AllCellsExceptHeader)
             CheckRows(_Check)
             dgvFileProperties.ResumeLayout()
@@ -807,13 +842,15 @@ Public Class reEncode
         tspbComplete.Value = 0
         selectedValues = _Movies.Movies.FindAll("sScanned", "")
         btnConvert.Enabled = False
-        btnReproOne.Enabled = False
+        btnClearOne.Enabled = False
+        btnClearErrors.Enabled = False
         btnMedia.Enabled = False
         If selectedValues.Count = 0 Then
             btnConvert.Enabled = True
             selectedValues = _Movies.Movies.FindAll("ProcessedResult", "")
             If selectedValues.Count < _Movies.Movies.Count Then
-                btnReproOne.Enabled = True
+                btnClearErrors.Enabled = True
+                btnClearOne.Enabled = True
             End If
         Else
             btnMedia.Enabled = True
@@ -840,7 +877,7 @@ Public Class reEncode
         DoConvertMovie()
     End Sub
 
-    Private Sub btnReproOne_Click(sender As Object, e As EventArgs) Handles btnReproOne.Click
+    Private Sub btnReproOne_Click(sender As Object, e As EventArgs) Handles btnClearOne.Click
         Dim aRow As DataGridViewRow
         aRow = dgvFileProperties.SelectedRows(0)
         Dim selectedValues As SortableBindingList(Of Movie) = _Movies.Movies.FindAll("Name", aRow.Cells(0).Value)
@@ -862,13 +899,54 @@ Public Class reEncode
         tspbComplete.Value = 0
         selectedValues = _Movies.Movies.FindAll("sScanned", "")
         btnConvert.Enabled = False
-        btnReproOne.Enabled = False
+        btnClearErrors.Enabled = False
+        btnClearOne.Enabled = False
         btnMedia.Enabled = False
         If selectedValues.Count = 0 Then
             btnConvert.Enabled = True
             selectedValues = _Movies.Movies.FindAll("ProcessedResult", "")
             If selectedValues.Count < _Movies.Movies.Count Then
-                btnReproOne.Enabled = True
+                btnClearErrors.Enabled = True
+                btnClearOne.Enabled = True
+            End If
+        Else
+            btnMedia.Enabled = True
+        End If
+        btnProcessOne.Enabled = True
+        btnSettings.Enabled = True
+        btnClearStatus.Enabled = True
+        Application.DoEvents()
+    End Sub
+
+    Private Sub BtnClearErrors_Click(sender As Object, e As EventArgs) Handles btnClearErrors.Click
+        Dim aRow As DataGridViewRow
+        aRow = dgvFileProperties.SelectedRows(0)
+        Dim selectedValues As SortableBindingList(Of Movie) = _Movies.Movies.FindAll("ProcessedResult", "-21")
+        If selectedValues.Count > 1 Then
+            For Each aMovie In selectedValues
+                aMovie._ProcessedResult = 0
+                aMovie._Processed = False
+                aMovie._newSize = 0
+            Next
+        End If
+        dgvFilePropertiesRefresh()
+        tsslStatus.Text = "Saving..."
+        Application.DoEvents()
+        SaveStatus()
+        btnSettings.Enabled = True
+        tsslStatus.Text = "Status"
+        tspbComplete.Value = 0
+        selectedValues = _Movies.Movies.FindAll("sScanned", "")
+        btnConvert.Enabled = False
+        btnClearErrors.Enabled = False
+        btnClearOne.Enabled = False
+        btnMedia.Enabled = False
+        If selectedValues.Count = 0 Then
+            btnConvert.Enabled = True
+            selectedValues = _Movies.Movies.FindAll("ProcessedResult", "")
+            If selectedValues.Count < _Movies.Movies.Count Then
+                btnClearErrors.Enabled = True
+                btnClearOne.Enabled = True
             End If
         Else
             btnMedia.Enabled = True
@@ -898,6 +976,8 @@ Public Class reEncode
             btnMedia.Enabled = False
             btnPause.Enabled = False
             btnSkipOne.Enabled = False
+            btnClearErrors.Enabled = False
+            btnClearOne.Enabled = False
             tsslStatus.Text = "Status"
             btnClearStatus.Enabled = False
             tsslFiles.Text = ""
@@ -979,8 +1059,9 @@ Public Class reEncode
         btnConvert.Enabled = False
         btnProcessOne.Enabled = False
         btnSettings.Enabled = True
-        btnReproOne.Enabled = False
+        btnClearOne.Enabled = False
         btnSkipOne.Enabled = False
+        btnClearErrors.Enabled = False
 
         tsslAvgFPS.Text = ""
         tsslETA.Text = ""
@@ -1002,25 +1083,36 @@ Public Class reEncode
 
                 _Movies = CType(serializer.Deserialize(myReader), Movies)
                 myReader.Close()
-                Dim selectedValues As SortableBindingList(Of Movie) = _Movies.Movies.FindAll("sScanned", "")
-                If selectedValues.Count = 0 Then
-                    btnConvert.Enabled = True
-                    selectedValues = _Movies.Movies.FindAll("ProcessedResult", "")
-                    If selectedValues.Count < _Movies.Movies.Count Then
-                        btnReproOne.Enabled = True
+                If _Movies.Movies.Count > 0 Then
+                    Dim selectedValues As SortableBindingList(Of Movie) = _Movies.Movies.FindAll("sScanned", "")
+                    If selectedValues.Count = 0 Then
+                        btnConvert.Enabled = True
+                        selectedValues = _Movies.Movies.FindAll("ProcessedResult", "")
+                        If selectedValues.Count < _Movies.Movies.Count Then
+                            btnClearErrors.Enabled = True
+                            btnClearOne.Enabled = True
+                        End If
+                    Else
+                        btnMedia.Enabled = True
                     End If
-                Else
-                    btnMedia.Enabled = True
-                End If
-                btnProcessOne.Enabled = True
-                btnClearStatus.Enabled = True
+                    btnProcessOne.Enabled = True
+                    btnClearStatus.Enabled = True
 
-                dgvFilePropertiesRefresh(, True)
-                tsslStatus.Text = "Status"
-                tspbComplete.Value = 0
-                btnClearStatus.Enabled = True
-                Application.DoEvents()
-                tssslRows.Text = "Rows: " & dgvFileProperties.RowCount
+                    dgvFilePropertiesRefresh(, True)
+                    tsslStatus.Text = "Status"
+                    tspbComplete.Value = 0
+                    btnClearStatus.Enabled = True
+                    Application.DoEvents()
+                    tssslRows.Text = "Rows: " & dgvFileProperties.RowCount
+                Else
+                    btnScan.Enabled = True
+                    tsslStatus.Text = "Status"
+                    btnClearStatus.Enabled = False
+                    tsslFiles.Text = ""
+                    tspbComplete.Value = 0
+                    Application.DoEvents()
+                    tssslRows.Text = ""
+                End If
             Catch ex As Exception
                 _Movies = New Movies
                 dgvFileProperties.DataSource = Nothing
